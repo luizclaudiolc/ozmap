@@ -1,8 +1,8 @@
-import * as app from 'express';
-import { UserModel } from './models';
+import * as express from 'express';
+import { RegionModel, UserModel } from './models';
 
-const server = app();
-const router = app.Router();
+const server = express();
+const router = express.Router();
 
 const STATUS = {
   OK: 200,
@@ -14,51 +14,104 @@ const STATUS = {
   DEFAULT_ERROR: 418,
 };
 
-router.get('/user', async (req, res) => {
-  const { page, limit } = req.query;
+server.use(express.json());
 
-  const [users, total] = await Promise.all([
-    UserModel.find().lean(),
-    UserModel.count(),
-  ]);
+router.get('/users', async (req, res) => {
+  try {
+    const { page, limit } = req.query;
 
-  return res.json({
-    rows: users,
-    page,
-    limit,
-    total,
-  });
+    const [users, total] = await Promise.all([
+      UserModel.find().lean(),
+      UserModel.countDocuments(),
+    ]);
+
+    return res.status(STATUS.OK).json({
+      rows: users,
+      page,
+      limit,
+      total,
+    });
+  } catch (error) {
+    return res.status(STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching users' });
+  }
 });
+
+router.post('/users', async (req, res) => {
+  try {
+    const { name, email, address, coordinates, regions } = req.body;
+    console.log({ name, email, address, coordinates, regions });
+    
+
+    if (!name || !email || (!address && !coordinates)) {
+      return res.status(STATUS.BAD_REQUEST).json({ message: 'Nome, e-mail e (endereço ou coordenadas) são obrigatórios' });
+    }
+
+    const newUser = new UserModel({ name, email, address, coordinates, regions });
+
+    await newUser.save();
+
+    return res.status(STATUS.CREATED).json(newUser);
+  } catch (error) {
+    console.error('Erro ao criar usuário:', error);
+    return res.status(STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Erro ao criar usuário' });
+  }
+});
+
 
 router.get('/users/:id', async (req, res) => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  const user = await UserModel.findOne({ _id: id }).lean();
+    const user = await UserModel.findOne({ _id: id }).lean();
 
-  if (!user) {
-    res.status(STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Region not found' });
+    if (!user) {
+      return res.status(STATUS.NOT_FOUND).json({ message: 'User not found' });
+    }
+
+    return res.status(STATUS.OK).json(user);
+  } catch (error) {
+    return res.status(STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Error fetching user' });
   }
-
-  return user;
 });
 
+
 router.put('/users/:id', async (req, res) => {
-  const { id } = req.params;
-  const { update } = req.body;
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
 
-  const user = await UserModel.findOne({ _id: id }).lean();
+    if (!name) {
+      return res.status(STATUS.BAD_REQUEST).json({ message: 'Invalid request body' });
+    }
 
-  if (!user) {
-    res.status(STATUS.DEFAULT_ERROR).json({ message: 'Region not found' });
+    const user = await UserModel.findOneAndUpdate({ _id: id }, { name }, { new: true });
+
+    if (!user) {
+      return res.status(STATUS.NOT_FOUND).json({ message: 'User not found' });
+    }
+
+    return res.status(STATUS.UPDATED).json({ message: 'User updated successfully', user });
+  } catch (error) {
+    return res.status(STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Error updating user' });
   }
+});
 
-  user.name = update.name;
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
 
-  await user.save();
+    const user = await UserModel.findByIdAndDelete(id);
 
-  return res.sendStatus(201);
+    if (!user) {
+      return res.status(STATUS.NOT_FOUND).json({ message: 'User not found' });
+    }
+
+    return res.status(STATUS.OK).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    return res.status(STATUS.INTERNAL_SERVER_ERROR).json({ message: 'Error deleting user' });
+  }
 });
 
 server.use(router);
 
-export default server.listen(3003);
+export default server;
