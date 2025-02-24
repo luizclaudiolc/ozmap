@@ -12,15 +12,21 @@ class Base extends TimeStamps {
   _id: string;
 }
 
+@pre<User>('validate', function (next) {
+  if ((this.address && this.coordinates) || (!this.address && !this.coordinates)) {
+    return next(new Error('You must provide either an address or coordinates, but not both.'));
+  }
+  next();
+})
 @pre<User>('save', async function (next) {
-  const region = this as Omit<any, keyof User> & User;
+  const user = this as Omit<any, keyof User> & User;
 
-  if (region.isModified('coordinates')) {
-    region.address = await lib.getAddressFromCoordinates(region.coordinates);
-  } else if (region.isModified('address')) {
-    const { lat, lng } = await lib.getCoordinatesFromAddress(region.address);
-
-    region.coordinates = [lng, lat];
+  if (user.isModified('coordinates') && user.coordinates) {
+    user.address = await lib.getAddressFromCoordinates(user.coordinates);
+  }
+  else if (user.isModified('address') && user.address) {
+    const { lat, lng } = await lib.getCoordinatesFromAddress(user.address);
+    user.coordinates = [lng, lat];
   }
 
   next();
@@ -32,15 +38,16 @@ export class User extends Base {
   @Prop({ required: true })
   email!: string;
 
-  @Prop({ required: true })
-  address: string;
+  @Prop({ required: false })
+  address?: string;
 
-  @Prop({ required: true, type: () => [Number] })
-  coordinates: [number, number];
+  @Prop({ required: false, type: () => [Number] })
+  coordinates?: [number, number];
 
   @Prop({ required: true, default: [], ref: () => Region, type: () => String })
   regions: Ref<Region>[];
 }
+
 
 @pre<Region>('save', async function (next) {
   const region = this as Omit<any, keyof Region> & Region;
@@ -57,6 +64,7 @@ export class User extends Base {
 
   next(region.validateSync());
 })
+
 @modelOptions({ schemaOptions: { validateBeforeSave: false } })
 export class Region extends Base {
   @Prop({ required: true, auto: true })
