@@ -5,7 +5,10 @@
   "main": "index.ts",
   "scripts": {
     "dev": "nodemon --exec ts-node src/index.ts",
-    "test": "mocha --require ts-node/register ./src/**/*.spec.ts --exit"
+    "test": "mocha --require ts-node/register --recursive 'src/**/*.{spec,test}.ts' --exit",
+    "test:watch": "nodemon --watch src --ext ts --exec \"pnpm test\"",
+    "coverage": "nyc pnpm test",
+    "lint": "eslint 'src/**/*.{js,ts}'"
   },
   "author": "",
   "license": "ISC",
@@ -30,6 +33,28 @@
     "sinon": "^16.0.0",
     "supertest": "^6.3.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "nyc": "^15.1.0",
+    "eslint": "^8.50.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "node_modules",
+      "test",
+      "**/*.test.ts",
+      "**/*.spec.ts"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ],
+    "sourceMap": true,
+    "instrument": true,
+    "all": true
   }
 }

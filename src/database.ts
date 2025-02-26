@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const env = {
+export const env = {
   MONGO_URI: 'mongodb://root:123456@127.0.0.1:27021/oz-map?authSource=admin',
 };
 
