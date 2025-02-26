@@ -5,16 +5,15 @@ import * as sinon from 'sinon';
 import { faker } from '@faker-js/faker';
 import { RegionModel, UserModel } from './models';
 import server from './server';
-import { env } from './database';
 
 
 
 describe('API Tests', () => {
   let userId: string;
 
-  before(async () => {
-    await mongoose.connect(`${env.MONGO_URI}`);
-  });
+  // before(async () => {
+  //   await mongoose.connect(`${env.MONGO_URI}`);
+  // });
 
   after(async () => {
     await mongoose.connection.close();
