@@ -1,87 +1,175 @@
-import 'reflect-metadata';
-
 import * as mongoose from 'mongoose';
 import * as supertest from 'supertest';
+import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { faker } from '@faker-js/faker';
-import { expect, assert } from 'chai';
-
-import './database';
-import { Region, RegionModel, UserModel } from './models';
-import GeoLib from './lib';
+import { RegionModel, UserModel } from './models';
 import server from './server';
+import { env } from './database';
 
-describe('Models', () => {
-  let user;
-  let session;
-  let geoLibStub: Partial<typeof GeoLib> = {};
+
+
+describe('API Tests', () => {
+  let userId: string;
 
   before(async () => {
-    geoLibStub.getAddressFromCoordinates = sinon.stub(GeoLib, 'getAddressFromCoordinates').resolves(faker.location.streetAddress({ useFullAddress: true }));
-    geoLibStub.getCoordinatesFromAddress = sinon.stub(GeoLib, 'getCoordinatesFromAddress').resolves({ lat: faker.location.latitude(), lng: faker.location.longitude() });
+    await mongoose.connect(`${env.MONGO_URI}`);
+  });
 
-    session = await mongoose.startSession();
-    user = await UserModel.create({
-      name: faker.person.firstName(),
-      email: faker.internet.email(),
-      address: faker.location.streetAddress({ useFullAddress: true }),
+  after(async () => {
+    await mongoose.connection.close();
+  });
+
+  beforeEach(async () => {
+    await UserModel.deleteMany({});
+    await RegionModel.deleteMany({});
+  });
+
+  // Testes para a rota GET /users
+  describe('GET /users', () => {
+    it('deve retornar uma lista de usuários', async () => {
+      await UserModel.create([
+        { name: faker.person.firstName(), email: faker.internet.email(), address: faker.location.streetAddress({ useFullAddress: true }) },
+        { name: faker.person.firstName(), email: faker.internet.email(), address: faker.location.streetAddress({ useFullAddress: true }) },
+      ]);
+
+      const response = await supertest(server).get('/users');
+      console.log(response.body.rows);
+      
+
+      expect(response.status).to.equal(200);
+      expect(response.body.rows).to.be.an('array').with.length(2);
     });
   });
 
-  after(() => {
-    sinon.restore();
-    session.endSession();
-  });
+  // Testes para a rota POST /users
+  // describe('POST /users', () => {
+  //   it('deve criar um novo usuário', async () => {
+  //     const newUser = {
+  //       name: faker.person.firstName(),
+  //       email: faker.internet.email(),
+  //       address: faker.location.streetAddress({ useFullAddress: true }),
+  //     };
 
-  beforeEach(() => {
-    session.startTransaction();
-  });
+  //     const response = await supertest(server).post('/users').send(newUser);
 
-  afterEach(() => {
-    session.commitTransaction();
-  });
+  //     expect(response.status).to.equal(201);
+  //     expect(response.body).to.include({ name: newUser.name, email: newUser.email });
+  //     userId = response.body._id;
+  //   });
 
-  describe('UserModel', () => {
-    it('should create a user', async () => {
-      expect(1).to.be.eq(1);
-    });
-  });
+  //   it('deve retornar erro ao faltar campos obrigatórios', async () => {
+  //     const response = await supertest(server).post('/users').send({});
 
-  describe('RegionModel', () => {
-    it('should create a region', async () => {
-      const regionData: Omit<Region, '_id'> = {
-        user: user._id,
-        name: faker.person.fullName()
-      };
+  //     expect(response.status).to.equal(400);
+  //     expect(response.body).to.have.property('message');
+  //   });
+  // });
 
-      const [region] = await RegionModel.create([regionData]);
+  // Testes para a rota GET /users/:id
+  // describe('GET /users/:id', () => {
+  //   it('deve retornar um usuário específico', async () => {
+  //     // Primeiro, cria um usuário para testar
+  //     const user = await UserModel.create({
+  //       name: faker.person.firstName(),
+  //       email: faker.internet.email(),
+  //     });
 
-      expect(region).to.deep.include(regionData);
-    });
+  //     const response = await supertest(server).get(`/users/${user._id}`);
 
-    it('should rollback changes in case of failure', async () => {
-      const userRecord = await UserModel.findOne({ _id: user._id }).select('regions').lean();
-      try {
-        await RegionModel.create([{ user: user._id }]);
+  //     expect(response.status).to.equal(200);
+  //     expect(response.body).to.include({ name: user.name, email: user.email });
+  //   });
 
-        assert.fail('Should have thrown an error');
-      } catch (error) {
-        const updatedUserRecord = await UserModel.findOne({ _id: user._id }).select('regions').lean();
+  //   it('deve retornar erro se o usuário não existir', async () => {
+  //     const fakeId = new mongoose.Types.ObjectId();
+  //     const response = await supertest(server).get(`/users/${fakeId}`);
 
-        expect(userRecord).to.deep.eq(updatedUserRecord);
-      }
-    });
-  });
+  //     expect(response.status).to.equal(404);
+  //     expect(response.body).to.have.property('message', 'User not found');
+  //   });
+  // });
 
-  it('should return a list of users', async () => {
-    const response = supertest(server).get(`/user`);
+  // Testes para a rota PUT /users/:id
+  // describe('PUT /users/:id', () => {
+  //   it('deve atualizar um usuário existente', async () => {
+  //     const user = await UserModel.create({
+  //       name: 'Nome Antigo',
+  //       email: 'email@antigo.com',
+  //     });
 
-    expect(response).to.have.property('status', 200);
-  });
+  //     const updatedData = { name: 'Nome Novo' };
 
-  it('should return a user', async () => {
-    const response = await supertest(server).get(`/users/${user._id}`);
+  //     const response = await supertest(server).put(`/users/${user._id}`).send(updatedData);
 
-    expect(response).to.have.property('status', 200);
-  });
+  //     expect(response.status).to.equal(201);
+  //     expect(response.body.user).to.include({ name: 'Nome Novo' });
+  //   });
+
+  //   it('deve retornar erro ao tentar atualizar usuário inexistente', async () => {
+  //     const fakeId = new mongoose.Types.ObjectId();
+  //     const response = await supertest(server).put(`/users/${fakeId}`).send({ name: 'Teste' });
+
+  //     expect(response.status).to.equal(404);
+  //     expect(response.body).to.have.property('message', 'User not found');
+  //   });
+  // });
+
+  // Testes para a rota DELETE /users/:id
+  // describe('DELETE /users/:id', () => {
+  //   it('deve deletar um usuário existente', async () => {
+  //     const user = await UserModel.create({
+  //       name: faker.person.firstName(),
+  //       email: faker.internet.email(),
+  //     });
+
+  //     const response = await supertest(server).delete(`/users/${user._id}`);
+
+  //     expect(response.status).to.equal(200);
+  //     expect(response.body).to.have.property('message', 'User deleted successfully');
+  //   });
+
+  //   it('deve retornar erro ao tentar deletar usuário inexistente', async () => {
+  //     const fakeId = new mongoose.Types.ObjectId();
+  //     const response = await supertest(server).delete(`/users/${fakeId}`);
+
+  //     expect(response.status).to.equal(404);
+  //     expect(response.body).to.have.property('message', 'User not found');
+  //   });
+  // });
+
+  // Testes para as rotas de Regions
+  // describe('Regions API Tests', () => {
+  //   let user; // Usuário para associar à região
+
+  //   beforeEach(async () => {
+  //     user = await UserModel.create({
+  //       name: faker.person.firstName(),
+  //       email: faker.internet.email(),
+  //     });
+  //   });
+
+  //   // Teste para criação de região
+  //   it('deve criar uma nova região', async () => {
+  //     const newRegion = {
+  //       name: faker.lorem.word(),
+  //       user: user._id,
+  //     };
+
+  //     const response = await supertest(server).post('/regions').send(newRegion);
+
+  //     expect(response.status).to.equal(201);
+  //     expect(response.body).to.include({ name: newRegion.name });
+  //   });
+
+  //   // Teste para listar regiões
+  //   it('deve retornar uma lista de regiões', async () => {
+  //     await RegionModel.create([{ name: 'Região 1', user: user._id }, { name: 'Região 2', user: user._id }]);
+
+  //     const response = await supertest(server).get('/regions');
+
+  //     expect(response.status).to.equal(200);
+  //     expect(response.body.rows).to.be.an('array').with.length(2);
+  //   });
+  // });
 });

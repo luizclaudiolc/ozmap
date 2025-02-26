@@ -13,24 +13,44 @@ class Base extends TimeStamps {
 }
 
 @pre<User>('validate', function (next) {
-  if ((this.address && this.coordinates) || (!this.address && !this.coordinates)) {
-    return next(new Error('You must provide either an address or coordinates, but not both.'));
+  if (this.isNew) {
+    if ((this.address && this.coordinates) || (!this.address && !this.coordinates)) {
+      return next(new Error('You must provide either an address or coordinates, but not both.'));
+    }
   }
   next();
 })
+
 @pre<User>('save', async function (next) {
   const user = this as Omit<any, keyof User> & User;
 
+  const session = user.$session(); // Obtém a sessão ativa, se houver
+
   if (user.isModified('coordinates') && user.coordinates) {
-    user.address = await lib.getAddressFromCoordinates(user.coordinates);
-  }
-  else if (user.isModified('address') && user.address) {
+    user.address = await lib.getAddressFromCoordinates(user.coordinates.coordinates);
+  } else if (user.isModified('address') && user.address) {
     const { lat, lng } = await lib.getCoordinatesFromAddress(user.address);
-    user.coordinates = [lng, lat];
+    user.coordinates = {
+      type: 'Point',
+      coordinates: [lng, lat],
+    };
+  }
+
+  try {
+    if (session) {
+      await UserModel.updateOne({ _id: user._id }, user, { session });
+    } else {
+      await UserModel.updateOne({ _id: user._id }, user);
+    }
+  } catch (error) {
+    return next(error);
   }
 
   next();
 })
+
+
+
 export class User extends Base {
   @Prop({ required: true })
   name!: string;
@@ -41,8 +61,18 @@ export class User extends Base {
   @Prop({ required: false })
   address?: string;
 
-  @Prop({ required: false, type: () => [Number] })
-  coordinates?: [number, number];
+  @Prop({
+    required: false,
+    type: () => Object,
+    validate: {
+      validator: (v) => v && v.type === 'Point' && Array.isArray(v.coordinates) && v.coordinates.length === 2,
+      message: (props) => `${props.value} is not a valid GeoJSON Point`,
+    },
+  })
+  coordinates?: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
 
   @Prop({ required: true, default: [], ref: () => Region, type: () => String })
   regions: Ref<Region>[];
@@ -56,14 +86,28 @@ export class User extends Base {
     region._id = new ObjectId().toString();
   }
 
-  if (region.isNew) {
-    const user = await UserModel.findOne({ _id: region.user });
-    user.regions.push(region._id);
-    await user.save({ session: region.$session() });
+  if (region.isNew && region.user) {
+    const session = region.$session();
+    const user = await UserModel.findById(region.user).session(session);
+
+    if (!user) {
+      return next(new Error('Usuário não encontrado para vinculação da região.'));
+    }
+
+    if (!user.regions.includes(region._id)) {
+      user.regions.push(region._id);
+
+      if (session) {
+        await user.save({ session });
+      } else {
+        await user.save();
+      }
+    }
   }
 
-  next(region.validateSync());
+  next();
 })
+
 
 @modelOptions({ schemaOptions: { validateBeforeSave: false } })
 export class Region extends Base {
@@ -73,9 +117,16 @@ export class Region extends Base {
   @Prop({ required: true })
   name!: string;
 
-  @Prop({ ref: () => User, required: true, type: () => String })
+  @Prop({ required: true, type: () => Object, validate: { validator: (v) => v.type === 'Polygon', message: 'Invalid GeoJSON Polygon' } })
+  boundary!: {
+    type: 'Polygon';
+    coordinates: [[number, number][]];
+  };
+
+  @Prop({ ref: () => User, required: false, type: () => String })
   user: Ref<User>;
 }
 
 export const UserModel = getModelForClass(User);
 export const RegionModel = getModelForClass(Region);
+RegionModel.schema.index({ boundary: '2dsphere' });
