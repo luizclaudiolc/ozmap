@@ -28,3 +28,11 @@ export const MODELS_ERROR_MESSAGES = {
   INVALID_GEOJSON_POINT: 'Ponto GeoJSON inválido.',
   INVALID_GEOJSON_POLYGON: 'Polígono GeoJSON inválido.',
 };
+
+export const GEO_ERROR_MESSAGES = {
+  ADDRESS_NOT_FOUND: 'Endereço não encontrado',
+  COORDINATES_NOT_FOUND: 'Coordenadas não encontradas',
+  COORDINATES_NOT_VALID: 'Coordenadas devem ser números válidos',
+  GEO_ERROR: 'Erro ao buscar coordenadas',
+  TIMEOUT: 'Tempo de requisição excedido',
+};

@@ -1,64 +1,114 @@
 import fetch from 'node-fetch';
+import { ICoordinates, INominatimReverseResponse, INominatimSearchResponse } from './interfaces/all.interfaces';
+import { GEO_ERROR_MESSAGES } from './helpers/default-messeges';
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org';
+const REQUEST_TIMEOUT = 10000;
+
+class GeoError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'GeoError';
+  }
+}
 
 class GeoLib {
-  /**
-   * Obtém um endereço a partir de coordenadas (latitude e longitude).
-   * @param coordinates Coordenadas no formato [longitude, latitude] ou { lat, lng }.
-   * @returns Endereço correspondente às coordenadas.
-   */
   public async getAddressFromCoordinates(
-    coordinates: [number, number] | { lat: number; lng: number }
+    coordinates: [number, number] | ICoordinates
   ): Promise<string> {
     try {
-      let lat: number, lng: number;
-      console.log('coordinates:', coordinates);
+      const { lat, lng } = this.normalizeCoordinates(coordinates);
+            
+      this.validateCoordinates(lat, lng);
       
-
-      if (Array.isArray(coordinates)) {
-        [lng, lat] = coordinates; 
-      } else {
-        ({ lat, lng } = coordinates);
-      }
-
-      const response = await fetch(`${NOMINATIM_URL}/reverse?lat=${lat}&lon=${lng}&format=json`);
-      const data = await response.json() as any;
-
+      const url = `${NOMINATIM_URL}/reverse?lat=${lat}&lon=${lng}&format=json`;
+      const data = await this.fetchWithTimeout<INominatimReverseResponse>(url);
+      
       if (!data.display_name) {
-        throw new Error('Endereço não encontrado');
+        throw new GeoError(GEO_ERROR_MESSAGES.ADDRESS_NOT_FOUND);
       }
-
+      
       return data.display_name;
     } catch (error) {
-      console.error('Erro ao obter endereço:', error);
-      throw new Error('Falha ao buscar endereço');
+      this.handleError(GEO_ERROR_MESSAGES.ADDRESS_NOT_FOUND, error);
+      throw new Error(GEO_ERROR_MESSAGES.GEO_ERROR);
     }
   }
 
-  /**
-   * Obtém coordenadas (latitude e longitude) pelo endereço.
-   * @param address Endereço a ser convertido.
-   * @returns Coordenadas { lat, lng } do endereço informado.
-   */
-  public async getCoordinatesFromAddress(address: string): Promise<{ lat: number; lng: number }> {
+  public async getCoordinatesFromAddress(address: string): Promise<ICoordinates> {
     try {
-      const response = await fetch(`${NOMINATIM_URL}/search?q=${encodeURIComponent(address)}&format=json&limit=1`);
-      const data = await response.json() as any;
-
-      if (!data.length) {
-        throw new Error('Endereço não encontrado');
+      if (!address || address.trim() === '') {
+        throw new GeoError('Endereço não pode ser vazio');
       }
 
-      return {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon),
-      };
-    } catch (error) {
-      console.error('Erro ao obter coordenadas:', error);
-      throw new Error('Falha ao buscar coordenadas');
+       const url = `${NOMINATIM_URL}/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
+       const data = await this.fetchWithTimeout<INominatimSearchResponse[]>(url);
+       
+       if (!data.length || !data[0].lat || !data[0].lon) {
+         throw new GeoError(GEO_ERROR_MESSAGES.COORDINATES_NOT_FOUND);
+       }
+       
+       return {
+         lat: parseFloat(data[0].lat),
+         lng: parseFloat(data[0].lon),
+       };
+     } catch (error) {
+       this.handleError(GEO_ERROR_MESSAGES.COORDINATES_NOT_FOUND, error);
+       throw new GeoError(GEO_ERROR_MESSAGES.GEO_ERROR);
+     }
+  }
+
+  private normalizeCoordinates(
+    coordinates: [number, number] | ICoordinates
+  ): ICoordinates {
+    if (Array.isArray(coordinates)) {
+      const [lng, lat] = coordinates;
+      return { lat, lng };
+    }
+    return coordinates;
+  }
+
+  private validateCoordinates(lat: number, lng: number): void {
+    if (isNaN(lat) || isNaN(lng)) {
+      throw new GeoError(GEO_ERROR_MESSAGES.COORDINATES_NOT_VALID);
     }
   }
+
+  private async fetchWithTimeout<T>(url: string): Promise<T> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+    
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'GeoLib/1.0'
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(GEO_ERROR_MESSAGES.GEO_ERROR);
+      }
+      
+      return await response.json() as T;
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      
+      if (error.name === 'AbortError') {
+        throw new Error(GEO_ERROR_MESSAGES.TIMEOUT);
+      }
+      
+      throw error;
+    }
+  }
+
+  private handleError(context: string, error: unknown): void {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(`${context}: ${errorMessage}`);
+  }
+  
 }
 
 export default new GeoLib();
