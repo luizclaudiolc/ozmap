@@ -25,3 +25,20 @@ export interface IGeoJSONPolygon {
   type: 'Polygon';
   coordinates: [[number, number][]];
 }
+
+export interface ICoordinates {
+  lat: number;
+  lng: number;
+}
+
+export interface INominatimReverseResponse {
+  display_name?: string;
+  error?: string;
+}
+
+export interface INominatimSearchResponse {
+  lat?: string;
+  lon?: string;
+  display_name?: string;
+  error?: string;
+}
