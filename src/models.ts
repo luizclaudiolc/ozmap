@@ -15,7 +15,7 @@ class Base extends TimeStamps {
 @pre<User>('validate', function (next) {
   if (this.isNew) {
     if ((this.address && this.coordinates) || (!this.address && !this.coordinates)) {
-      return next(new Error(MODELS_ERROR_MESSAGES.ADDRESS_OR_COORDINATES));
+      return next(new Error(MODELS_ERROR_MESSAGES.ADDRESS_OR_COORDINATES()));
     }
   }
   next();
@@ -73,7 +73,7 @@ export class User extends Base implements IUser {
       const user = await UserModel.findById(region.user).session(session);
 
       if (!user) {
-        return next(new Error(MODELS_ERROR_MESSAGES.USER_NOT_FOUND));
+        return next(new Error(MODELS_ERROR_MESSAGES.USER_NOT_FOUND()));
       }
 
       if (!user.regions.includes(region._id)) {
