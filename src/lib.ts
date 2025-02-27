@@ -25,13 +25,13 @@ class GeoLib {
       const data = await this.fetchWithTimeout<INominatimReverseResponse>(url);
       
       if (!data.display_name) {
-        throw new GeoError(GEO_ERROR_MESSAGES.ADDRESS_NOT_FOUND);
+        throw new GeoError(GEO_ERROR_MESSAGES.ADDRESS_NOT_FOUND());
       }
       
       return data.display_name;
     } catch (error) {
-      this.handleError(GEO_ERROR_MESSAGES.ADDRESS_NOT_FOUND, error);
-      throw new Error(GEO_ERROR_MESSAGES.GEO_ERROR);
+      this.handleError(GEO_ERROR_MESSAGES.ADDRESS_NOT_FOUND(), error);
+      throw new Error(GEO_ERROR_MESSAGES.GEO_ERROR());
     }
   }
 
@@ -45,7 +45,7 @@ class GeoLib {
        const data = await this.fetchWithTimeout<INominatimSearchResponse[]>(url);
        
        if (!data.length || !data[0].lat || !data[0].lon) {
-         throw new GeoError(GEO_ERROR_MESSAGES.COORDINATES_NOT_FOUND);
+         throw new GeoError(GEO_ERROR_MESSAGES.COORDINATES_NOT_FOUND());
        }
        
        return {
@@ -53,8 +53,8 @@ class GeoLib {
          lng: parseFloat(data[0].lon),
        };
      } catch (error) {
-       this.handleError(GEO_ERROR_MESSAGES.COORDINATES_NOT_FOUND, error);
-       throw new GeoError(GEO_ERROR_MESSAGES.GEO_ERROR);
+       this.handleError(GEO_ERROR_MESSAGES.COORDINATES_NOT_FOUND(), error);
+       throw new GeoError(GEO_ERROR_MESSAGES.GEO_ERROR());
      }
   }
 
@@ -69,8 +69,10 @@ class GeoLib {
   }
 
   private validateCoordinates(lat: number, lng: number): void {
+    console.log('Coordinates:', { lat, lng });
+    
     if (isNaN(lat) || isNaN(lng)) {
-      throw new GeoError(GEO_ERROR_MESSAGES.COORDINATES_NOT_VALID);
+      throw new GeoError(GEO_ERROR_MESSAGES.COORDINATES_NOT_VALID());
     }
   }
 
@@ -89,7 +91,7 @@ class GeoLib {
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        throw new Error(GEO_ERROR_MESSAGES.GEO_ERROR);
+        throw new Error(GEO_ERROR_MESSAGES.GEO_ERROR());
       }
       
       return await response.json() as T;
@@ -97,7 +99,7 @@ class GeoLib {
       clearTimeout(timeoutId);
       
       if (error.name === 'AbortError') {
-        throw new Error(GEO_ERROR_MESSAGES.TIMEOUT);
+        throw new Error(GEO_ERROR_MESSAGES.TIMEOUT());
       }
       
       throw error;
