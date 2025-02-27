@@ -1,82 +1,127 @@
-# OZmap Challenge: Construindo a Geolocalização do Futuro
+# OZmap
 
-Olá desenvolvedor(a)! Bem-vindo(a) ao Desafio Técnico do OZmap. Este é um projeto que simula um cenário real de nossa empresa, onde você irá desempenhar um papel crucial ao desenvolver uma API RESTful robusta para gerenciar usuários e localizações. Estamos muito animados para ver sua abordagem e solução!
-
-## 🌍 **Visão Geral**
-
-Em um mundo conectado e globalizado, a geolocalização se torna cada vez mais essencial. E aqui no OZmap, buscamos sempre otimizar e melhorar nossos sistemas. Assim, você encontrará um protótipo que precisa de sua experiência para ser corrigido, melhorado e levado ao próximo nível.
-
-## 🛠 **Especificações Técnicas**
-
-- **Node.js**: Versão 20 ou superior.
-- **Banco de Dados**: Mongo 7+.
-- **ORM**: Mongoose / Typegoose.
-- **Linguagem**: Typescript.
-- **Formatação e Linting**: Eslint + prettier.
-- **Comunicação com MongoDB**: Deve ser feita via container.
-
-## 🔍 **Funcionalidades Esperadas**
-
-### Usuários
-- **CRUD** completo para usuários.
-- Cada usuário deve ter nome, email, endereço e coordenadas.
-- Na criação, o usuário pode fornecer endereço ou coordenadas. Haverá erro caso forneça ambos ou nenhum.
-- Uso de serviço de geolocalização para resolver endereço ↔ coordenadas.
-- Atualização de endereço ou coordenadas deve seguir a mesma lógica.
-
-### Regiões
-- **CRUD** completo para regiões.
-- Uma região é definida como um polígono em GeoJSON, um formato padrão para representar formas geográficas. Cada região tem um nome, um conjunto de coordenadas que formam o polígono, e um usuário que será o dono da região.
-- Listar regiões contendo um ponto específico.
-- Listar regiões a uma certa distância de um ponto, com opção de filtrar regiões não pertencentes ao usuário que fez a requisição.
-- Exemplo de um polígono simples em GeoJSON:
-  ```json
-  {
-    "type": "Polygon",
-    "coordinates": [
-      [
-        [longitude1, latitude1],
-        [longitude2, latitude2],
-        [longitude3, latitude3],
-        [longitude1, latitude1] // Fecha o polígono
-      ]
-    ]
-  }
-  ```
-
-### Testes
-- Unitários e de integração.
-
-## 🌟 **Diferenciais**
-
-- Autenticação não é requisito, podendo então o usuário ser fornecido junto do corpo da requisição. Caso implemente autenticação, o usuário deve ser obtido a partir do token.
-- Interface básica de usuário.
-- Documentação completa da API.
-- Internacionalização.
-- Cobertura de código.
-- Utilização de mongo session
-
-## ⚖ **Critérios de Avaliação**
-
-1. Organização e clareza do código.
-2. Estruturação do projeto.
-3. Qualidade e eficiência do código.
-4. Cobertura e qualidade de testes.
-5. Pontos diferenciais citados acima.
-6. Tempo de entrega (será considerado apenas o cumprimento do prazo, sem distinção entre entregas feitas no primeiro ou no último dia, com ênfase na qualidade da entrega).
-7. Padronização e clareza das mensagens de erro.
-8. Organização dos commits.
-9. Implementação de logs.
-10. Adesão às boas práticas de API RESTful.
-
-## 🚀 **Entrega**
-
-1. Crie um repositório público com a base desse código.
-2. Crie uma branch para realizar o seu trabalho.
-3. Ao finalizar, faça um pull request para a branch `main` do seu repositório.
-4. Envie um email para `rh@ozmap.com.br` informando que o teste foi concluído.
-5. Aguarde nosso feedback.
+OZmap é uma API RESTful construída em Node.js com TypeScript que permite gerenciar usuários e suas localizações geográficas utilizando o padrão GeoJSON. O projeto integra MongoDB (via Mongoose) e implementa internacionalização (i18next) para mensagens multilíngues.
 
 ---
 
-Estamos ansiosos para ver sua implementação e criatividade em ação! Boa sorte e que a força do código esteja com você! 🚀
+## Funcionalidades
+
+- **Gerenciamento de Usuários**
+  - **Criar Usuário** (`POST /users`): Cria um novo usuário com nome, e-mail, coordenadas (no formato GeoJSON) e regiões associadas.
+  - **Listar Usuários** (`GET /users`): Retorna uma lista com todos os usuários cadastrados.
+  - **Detalhar Usuário** (`GET /users/:id`): Retorna os detalhes de um usuário específico, identificado pelo seu ID.
+  - **Atualizar Usuário** (`PUT /users/:id`): Atualiza os dados de um usuário.
+  - **Remover Usuário** (`DELETE /users/:id`): Remove um usuário do sistema.
+
+- **Gerenciamento de Regiões**
+  - **Criar Região** (`POST /regions`): Cria uma nova região.
+  - **Listar Regiões** (`GET /regions`): Retorna todas as regiões cadastradas.
+  - **Detalhar Região** (`GET /regions/:id`): Exibe detalhes de uma região específica.
+  - **Atualizar Região** (`PUT /regions/:id`): Atualiza as informações de uma região.
+  - **Remover Região** (`DELETE /regions/:id`): Remove uma região.
+  - **Buscar Ponto em Região** (`GET /regions/contains`): Rotorna  se um ponto especificado por coordenadas (latitude e longitude) está contido dentro de uma região armazenada no banco de dados.
+  - **Busca Região por distância** (`GET /regions/near`):  Encontrar regiões próximas a um ponto específico definido por coordenadas de latitude e longitude, dentro de uma determinada distância.
+
+- **Geolocalização**
+  - Validação e armazenamento de pontos geográficos no padrão GeoJSON (tipo `Point` com coordenadas em formato `[longitude, latitude]`).
+  - Busca reversa de endereços a partir de coordenadas através de integrações com APIs de geocodificação.
+
+- **Internacionalização**
+  - Mensagens de erro e sucesso traduzidas para vários idiomas (pt-BR, en, es) utilizando i18next.
+
+---
+
+## Pré-requisitos
+
+- **Node.js**: Versão 20 ou superior.
+- **npm** ou **pnpm**
+- **Docker
+- **MongoDB**: Caso opte por não utilizar o Docker, certifique-se de que o MongoDB está instalado localmente.
+
+---
+
+## Configuração e Execução
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/luizclaudiolc/ozmap.git
+cd ozmap
+```
+
+2. Instale as dependências
+
+```bash
+pnpm i
+```
+
+3. Suba o MongoDB via Docker
+
+Caso prefira usar Docker para o banco de dados, inicie o MongoDB com:
+
+```bash
+docker start seu-container-docker
+```
+
+4. Inicie o Servidor
+
+Para executar o servidor em modo de desenvolvimento, utilize:
+
+```bash
+pnpm run dev
+```
+
+O servidor ficará disponível em: http://localhost:3000
+Endpoints da API
+Usuários
+
+    Criar Usuário
+    POST /users
+    Payload Exemplo:
+
+    {
+      "name": "João",
+      "email": "joao@email.com",
+      "coordinates": [-43.174, -22.511]
+      "regions": []
+    }
+
+    Listar Usuários
+    GET /users
+
+    Detalhar Usuário
+    GET /users/:id
+
+    Atualizar Usuário
+    PUT /users/:id
+
+    Remover Usuário
+    DELETE /users/:id
+
+Regiões
+
+As rotas para gerenciamento de regiões seguem a mesma estrutura do CRUD:
+
+    Criar Região: POST /regions
+    Listar Regiões: GET /regions
+    Detalhar Região: GET /regions/:id
+    Atualizar Região: PUT /regions/:id
+    Remover Região: DELETE /regions/:id
+	Buscar Ponto em Região: GET /regions/contains
+	Busca Região por distância: GET /regions/near
+
+5. Testes
+
+Para executar os testes automatizados do projeto, utilize:
+
+```bash
+pnpm run test:watch
+```
+
+Os testes utilizam o Supertest para simular requisições HTTP e validar as respostas da API.
+
+Internacionalização
+
+O projeto utiliza i18next para fornecer mensagens multilíngues.
+
+    As traduções estão definidas em arquivos de configuração no diretório src/default-messeges.ts .
