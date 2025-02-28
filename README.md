@@ -7,6 +7,7 @@ OZmap é uma API RESTful construída em Node.js com TypeScript que permite geren
 ## Funcionalidades
 
 - **Gerenciamento de Usuários**
+
   - **Criar Usuário** (`POST /users`): Cria um novo usuário com nome, e-mail, coordenadas (no formato GeoJSON) e regiões associadas.
   - **Listar Usuários** (`GET /users`): Retorna uma lista com todos os usuários cadastrados.
   - **Detalhar Usuário** (`GET /users/:id`): Retorna os detalhes de um usuário específico, identificado pelo seu ID.
@@ -14,15 +15,17 @@ OZmap é uma API RESTful construída em Node.js com TypeScript que permite geren
   - **Remover Usuário** (`DELETE /users/:id`): Remove um usuário do sistema.
 
 - **Gerenciamento de Regiões**
+
   - **Criar Região** (`POST /regions`): Cria uma nova região.
   - **Listar Regiões** (`GET /regions`): Retorna todas as regiões cadastradas.
   - **Detalhar Região** (`GET /regions/:id`): Exibe detalhes de uma região específica.
   - **Atualizar Região** (`PUT /regions/:id`): Atualiza as informações de uma região.
   - **Remover Região** (`DELETE /regions/:id`): Remove uma região.
-  - **Buscar Ponto em Região** (`GET /regions/contains`): Rotorna  se um ponto especificado por coordenadas (latitude e longitude) está contido dentro de uma região armazenada no banco de dados.
-  - **Busca Região por distância** (`GET /regions/near`):  Encontrar regiões próximas a um ponto específico definido por coordenadas de latitude e longitude, dentro de uma determinada distância.
+  - **Buscar Ponto em Região** (`GET /regions/contains`): Rotorna se um ponto especificado por coordenadas (latitude e longitude) está contido dentro de uma região armazenada no banco de dados.
+  - **Busca Região por distância** (`GET /regions/near`): Encontrar regiões próximas a um ponto específico definido por coordenadas de latitude e longitude, dentro de uma determinada distância.
 
 - **Geolocalização**
+
   - Validação e armazenamento de pontos geográficos no padrão GeoJSON (tipo `Point` com coordenadas em formato `[longitude, latitude]`).
   - Busca reversa de endereços a partir de coordenadas através de integrações com APIs de geocodificação.
 
@@ -35,7 +38,7 @@ OZmap é uma API RESTful construída em Node.js com TypeScript que permite geren
 
 - **Node.js**: Versão 20 ou superior.
 - **npm** ou **pnpm**
-- **Docker
+- \*\*Docker
 - **MongoDB**: Caso opte por não utilizar o Docker, certifique-se de que o MongoDB está instalado localmente.
 
 ---
@@ -107,8 +110,8 @@ As rotas para gerenciamento de regiões seguem a mesma estrutura do CRUD:
     Detalhar Região: GET /regions/:id
     Atualizar Região: PUT /regions/:id
     Remover Região: DELETE /regions/:id
-	Buscar Ponto em Região: GET /regions/contains
-	Busca Região por distância: GET /regions/near
+    Buscar Ponto em Região: GET /regions/contains
+    Busca Região por distância: GET /regions/near
 
 5. Testes
 

@@ -24,30 +24,30 @@ export const MESSAGE_KEYS = {
   USER_CREATED: 'user.created',
   USER_UPDATED: 'user.updated',
   USER_DELETED: 'user.deleted',
-  
+
   // Regiões
   REGION_NOT_FOUND: 'region.notFound',
   REGION_CREATED: 'region.created',
   REGION_UPDATED: 'region.updated',
   REGION_DELETED: 'region.deleted',
   INVALID_POLYGON: 'region.invalidPolygon',
-  
+
   // Erros do servidor
   INVALID_DATA: 'error.invalidData',
   SERVER_ERROR: 'error.server',
-  
+
   // Validações de modelo
   ADDRESS_OR_COORDINATES: 'validation.addressOrCoordinates',
   INVALID_GEOJSON_POINT: 'validation.invalidGeoJsonPoint',
   INVALID_GEOJSON_POLYGON: 'validation.invalidGeoJsonPolygon',
-  
+
   // Erros de geo
   ADDRESS_NOT_FOUND: 'geo.addressNotFound',
   ADDRESS_NOT_VALID: 'geo.addressNotValid',
   COORDINATES_NOT_FOUND: 'geo.coordinatesNotFound',
   COORDINATES_NOT_VALID: 'geo.coordinatesNotValid',
   GEO_ERROR: 'geo.error',
-  TIMEOUT: 'geo.timeout'
+  TIMEOUT: 'geo.timeout',
 };
 
 export const setupI18n = (lng = 'en-US') => {
@@ -55,7 +55,7 @@ export const setupI18n = (lng = 'en-US') => {
     lng,
     fallbackLng: 'en',
     interpolation: {
-      escapeValue: false
+      escapeValue: false,
     },
     resources: {
       'pt-BR': {
@@ -64,23 +64,24 @@ export const setupI18n = (lng = 'en-US') => {
             notFound: 'Usuário não encontrado',
             created: 'Usuário criado com sucesso',
             updated: 'Usuário atualizado com sucesso',
-            deleted: 'Usuário deletado com sucesso'
+            deleted: 'Usuário deletado com sucesso',
           },
           region: {
             notFound: 'Região não encontrada',
             created: 'Região criada com sucesso',
             updated: 'Região atualizada com sucesso',
             deleted: 'Região deletada com sucesso',
-            invalidPolygon: 'Polígono inválido'
+            invalidPolygon: 'Polígono inválido',
           },
           error: {
             invalidData: 'Dados inválidos',
-            server: 'Erro interno no servidor'
+            server: 'Erro interno no servidor',
           },
           validation: {
-            addressOrCoordinates: 'Endereço ou coordenadas devem ser fornecidos',
+            addressOrCoordinates:
+              'Endereço ou coordenadas devem ser fornecidos',
             invalidGeoJsonPoint: 'Ponto GeoJSON inválido',
-            invalidGeoJsonPolygon: 'Polígono GeoJSON inválido'
+            invalidGeoJsonPolygon: 'Polígono GeoJSON inválido',
           },
           geo: {
             addressNotFound: 'Endereço não encontrado',
@@ -88,33 +89,33 @@ export const setupI18n = (lng = 'en-US') => {
             coordinatesNotFound: 'Coordenadas não encontradas',
             coordinatesNotValid: 'Coordenadas devem ser números válidos',
             error: 'Erro ao buscar coordenadas',
-            timeout: 'Tempo de requisição excedido'
-          }
-        }
+            timeout: 'Tempo de requisição excedido',
+          },
+        },
       },
-      'en': {
+      en: {
         translation: {
           user: {
             notFound: 'User not found',
             created: 'User created successfully',
             updated: 'User updated successfully',
-            deleted: 'User deleted successfully'
+            deleted: 'User deleted successfully',
           },
           region: {
             notFound: 'Region not found',
             created: 'Region created successfully',
             updated: 'Region updated successfully',
             deleted: 'Region deleted successfully',
-            invalidPolygon: 'Invalid polygon'
+            invalidPolygon: 'Invalid polygon',
           },
           error: {
             invalidData: 'Invalid data',
-            server: 'Internal server error'
+            server: 'Internal server error',
           },
           validation: {
             addressOrCoordinates: 'Address or coordinates must be provided',
             invalidGeoJsonPoint: 'Invalid GeoJSON point',
-            invalidGeoJsonPolygon: 'Invalid GeoJSON polygon'
+            invalidGeoJsonPolygon: 'Invalid GeoJSON polygon',
           },
           geo: {
             addressNotFound: 'Address not found',
@@ -122,33 +123,34 @@ export const setupI18n = (lng = 'en-US') => {
             coordinatesNotFound: 'Coordinates not found',
             coordinatesNotValid: 'Coordinates must be valid numbers',
             error: 'Error fetching coordinates',
-            timeout: 'Request timeout exceeded'
-          }
-        }
+            timeout: 'Request timeout exceeded',
+          },
+        },
       },
-      'es': {
+      es: {
         translation: {
           user: {
             notFound: 'Usuario no encontrado',
             created: 'Usuario creado con éxito',
             updated: 'Usuario actualizado con éxito',
-            deleted: 'Usuario eliminado con éxito'
+            deleted: 'Usuario eliminado con éxito',
           },
           region: {
             notFound: 'Región no encontrada',
             created: 'Región creada con éxito',
             updated: 'Región actualizada con éxito',
             deleted: 'Región eliminada con éxito',
-            invalidPolygon: 'Polígono inválido'
+            invalidPolygon: 'Polígono inválido',
           },
           error: {
             invalidData: 'Datos inválidos',
-            server: 'Error interno del servidor'
+            server: 'Error interno del servidor',
           },
           validation: {
-            addressOrCoordinates: 'Se debe proporcionar dirección o coordenadas',
+            addressOrCoordinates:
+              'Se debe proporcionar dirección o coordenadas',
             invalidGeoJsonPoint: 'Punto GeoJSON inválido',
-            invalidGeoJsonPolygon: 'Polígono GeoJSON inválido'
+            invalidGeoJsonPolygon: 'Polígono GeoJSON inválido',
           },
           geo: {
             addressNotFound: 'Dirección no encontrada',
@@ -156,13 +158,13 @@ export const setupI18n = (lng = 'en-US') => {
             coordinatesNotFound: 'Coordenadas no encontradas',
             coordinatesNotValid: 'Las coordenadas deben ser números válidos',
             error: 'Error al buscar coordenadas',
-            timeout: 'Tiempo de solicitud excedido'
-          }
-        }
-      }
-    }
+            timeout: 'Tiempo de solicitud excedido',
+          },
+        },
+      },
+    },
   });
-  
+
   return i18next;
 };
 

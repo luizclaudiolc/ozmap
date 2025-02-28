@@ -42,3 +42,18 @@ export interface INominatimSearchResponse {
   display_name?: string;
   error?: string;
 }
+
+export interface INearQuery {
+  boundary: {
+    $near: {
+      $geometry: {
+        type: string;
+        coordinates: number[];
+      };
+      $maxDistance: number;
+    };
+  };
+  user?: {
+    $ne: string;
+  };
+}
