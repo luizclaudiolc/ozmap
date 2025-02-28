@@ -43,6 +43,7 @@ export const MESSAGE_KEYS = {
   
   // Erros de geo
   ADDRESS_NOT_FOUND: 'geo.addressNotFound',
+  ADDRESS_NOT_VALID: 'geo.addressNotValid',
   COORDINATES_NOT_FOUND: 'geo.coordinatesNotFound',
   COORDINATES_NOT_VALID: 'geo.coordinatesNotValid',
   GEO_ERROR: 'geo.error',
@@ -83,6 +84,7 @@ export const setupI18n = (lng = 'en-US') => {
           },
           geo: {
             addressNotFound: 'Endereço não encontrado',
+            AddressNotValid: 'Endereço inválido ou vazio',
             coordinatesNotFound: 'Coordenadas não encontradas',
             coordinatesNotValid: 'Coordenadas devem ser números válidos',
             error: 'Erro ao buscar coordenadas',
@@ -116,6 +118,7 @@ export const setupI18n = (lng = 'en-US') => {
           },
           geo: {
             addressNotFound: 'Address not found',
+            addressNotValid: 'Invalid or empty address',
             coordinatesNotFound: 'Coordinates not found',
             coordinatesNotValid: 'Coordinates must be valid numbers',
             error: 'Error fetching coordinates',
@@ -149,6 +152,7 @@ export const setupI18n = (lng = 'en-US') => {
           },
           geo: {
             addressNotFound: 'Dirección no encontrada',
+            addressNotValid: 'Dirección inválida o vacía',
             coordinatesNotFound: 'Coordenadas no encontradas',
             coordinatesNotValid: 'Las coordenadas deben ser números válidos',
             error: 'Error al buscar coordenadas',
@@ -197,6 +201,7 @@ export const MODELS_ERROR_MESSAGES = {
 
 export const GEO_ERROR_MESSAGES = {
   ADDRESS_NOT_FOUND: () => t(MESSAGE_KEYS.ADDRESS_NOT_FOUND),
+  ADDRESS_NOT_VALID: () => t(MESSAGE_KEYS.ADDRESS_NOT_VALID),
   COORDINATES_NOT_FOUND: () => t(MESSAGE_KEYS.COORDINATES_NOT_FOUND),
   COORDINATES_NOT_VALID: () => t(MESSAGE_KEYS.COORDINATES_NOT_VALID),
   GEO_ERROR: () => t(MESSAGE_KEYS.GEO_ERROR),
