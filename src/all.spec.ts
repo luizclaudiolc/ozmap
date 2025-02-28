@@ -4,9 +4,10 @@ import supertest from 'supertest';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { faker } from '@faker-js/faker';
 import server from './server';
-import { RegionModel, UserModel } from './models';
 import { STATUS } from './helpers/default-messeges';
 import { IGeoJSONPoint, IUser } from './interfaces/all.interfaces';
+import { RegionModel } from './models/region.model';
+import { UserModel } from './models/user.model';
 
 const PETROPOLIS_COORDS = {
   lng_min: -43.15,
