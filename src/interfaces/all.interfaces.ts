@@ -1,4 +1,4 @@
-import { Ref } from "@typegoose/typegoose";
+import { Ref } from '@typegoose/typegoose';
 
 export interface IUser {
   _id: string;
