@@ -5,6 +5,8 @@ import { INearQuery, IRegion, IUser } from './interfaces/all.interfaces';
 import { SERVER_MESSAGES, STATUS } from './helpers/default-messeges';
 import { UserModel } from './models/user.model';
 import { RegionModel } from './models/region.model';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocs from './swagger.json';
 interface ICustomRequest extends Request {
   session?: mongoose.ClientSession;
 }
@@ -12,6 +14,8 @@ interface ICustomRequest extends Request {
 const server = express();
 const router = express.Router();
 server.use(express.json());
+
+server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 router.use(async (req: ICustomRequest, res, next) => {
   req.session = await mongoose.startSession();
