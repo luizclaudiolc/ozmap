@@ -1,10 +1,10 @@
-import express from 'express';
-import mongoose from 'mongoose';
-import { Request, Response,  } from 'express';
-import { IRegion, IUser } from './interfaces/all.interfaces';
-import { SERVER_MESSAGES, STATUS } from './helpers/default-messeges';
-import { UserModel } from './models/user.model';
-import { RegionModel } from './models/region.model';
+import express from "express";
+import mongoose from "mongoose";
+import { Request, Response } from "express";
+import { IRegion, IUser } from "./interfaces/all.interfaces";
+import { SERVER_MESSAGES, STATUS } from "./helpers/default-messeges";
+import { UserModel } from "./models/user.model";
+import { RegionModel } from "./models/region.model";
 interface ICustomRequest extends Request {
   session?: mongoose.ClientSession;
 }
@@ -19,7 +19,7 @@ router.use(async (req: ICustomRequest, res, next) => {
 });
 
 router.use((req: ICustomRequest, res, next) => {
-  res.on('finish', () => req.session?.endSession());
+  res.on("finish", () => req.session?.endSession());
   next();
 });
 
@@ -35,7 +35,7 @@ const handleError = (
 };
 
 // Rotas de Usuários
-router.get('/users', async (req: ICustomRequest, res) => {
+router.get("/users", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
   try {
     const users = await UserModel.find().lean<IUser[]>();
@@ -45,7 +45,7 @@ router.get('/users', async (req: ICustomRequest, res) => {
   }
 });
 
-router.post('/users', async (req: ICustomRequest, res) => {
+router.post("/users", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
   try {
     const { name, email, address, coordinates, regions } = req.body;
@@ -59,7 +59,7 @@ router.post('/users', async (req: ICustomRequest, res) => {
       name,
       email,
       address,
-      coordinates: coordinates ? { type: 'Point', coordinates } : undefined,
+      coordinates: coordinates ? { type: "Point", coordinates } : undefined,
       regions: [],
     });
     await newUser.save({ session });
@@ -83,7 +83,7 @@ router.post('/users', async (req: ICustomRequest, res) => {
   }
 });
 
-router.get('/users/:id', async (req: ICustomRequest, res) => {
+router.get("/users/:id", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
   try {
     const user = await UserModel.findById(req.params.id).lean<IUser>();
@@ -100,7 +100,7 @@ router.get('/users/:id', async (req: ICustomRequest, res) => {
   }
 });
 
-router.put('/users/:id', async (req: ICustomRequest, res) => {
+router.put("/users/:id", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
   try {
     const { id } = req.params;
@@ -135,7 +135,7 @@ router.put('/users/:id', async (req: ICustomRequest, res) => {
   }
 });
 
-router.delete('/users/:id', async (req: ICustomRequest, res) => {
+router.delete("/users/:id", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
   try {
     const { id } = req.params;
@@ -161,7 +161,7 @@ router.delete('/users/:id', async (req: ICustomRequest, res) => {
 });
 
 // Rotas de Regiões
-router.get('/regions', async (req: ICustomRequest, res) => {
+router.get("/regions", async (req: ICustomRequest, res) => {
   const session = await mongoose.startSession();
 
   try {
@@ -176,7 +176,7 @@ router.get('/regions', async (req: ICustomRequest, res) => {
   }
 });
 
-router.post('/regions', async (req: ICustomRequest, res) => {
+router.post("/regions", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
 
   try {
@@ -195,7 +195,7 @@ router.post('/regions', async (req: ICustomRequest, res) => {
         .json({ message: SERVER_MESSAGES.USER_NOT_FOUND() });
     }
 
-    if (boundary.type !== 'Polygon' || !Array.isArray(boundary.coordinates)) {
+    if (boundary.type !== "Polygon" || !Array.isArray(boundary.coordinates)) {
       return res
         .status(STATUS.BAD_REQUEST)
         .json({ message: SERVER_MESSAGES.INVALID_POLYGON() });
@@ -216,14 +216,13 @@ router.post('/regions', async (req: ICustomRequest, res) => {
   }
 });
 
-router.put('/regions/:id', async (req: ICustomRequest, res) => {
+router.put("/regions/:id", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
 
   try {
     const { id } = req.params;
     const { name, user, boundary } = req.body;
 
-    // Use findById com sessão e inclua lean() apenas se não precisar modificar o documento
     const region = await RegionModel.findById(id).session(session);
 
     if (!region) {
@@ -233,7 +232,6 @@ router.put('/regions/:id', async (req: ICustomRequest, res) => {
     }
 
     if (user && user !== region.user.toString()) {
-      // Realize operações atômicas com a mesma sessão
       await UserModel.findByIdAndUpdate(
         region.user,
         { $pull: { regions: region._id } },
@@ -252,7 +250,7 @@ router.put('/regions/:id', async (req: ICustomRequest, res) => {
     if (name) region.name = name;
 
     if (boundary) {
-      if (boundary.type !== 'Polygon' || !Array.isArray(boundary.coordinates)) {
+      if (boundary.type !== "Polygon" || !Array.isArray(boundary.coordinates)) {
         return res
           .status(STATUS.BAD_REQUEST)
           .json({ message: SERVER_MESSAGES.INVALID_POLYGON() });
@@ -268,7 +266,7 @@ router.put('/regions/:id', async (req: ICustomRequest, res) => {
   }
 });
 
-router.delete('/regions/:id', async (req: ICustomRequest, res) => {
+router.delete("/regions/:id", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
 
   try {
@@ -297,7 +295,7 @@ router.delete('/regions/:id', async (req: ICustomRequest, res) => {
   }
 });
 
-router.get('/regions/contains', async (req: ICustomRequest, res) => {
+router.get("/regions/contains", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
 
   try {
@@ -310,7 +308,7 @@ router.get('/regions/contains', async (req: ICustomRequest, res) => {
         .json({ message: SERVER_MESSAGES.INVALID_DATA() });
     }
 
-    const point = { type: 'Point', coordinates: [lng, lat] };
+    const point = { type: "Point", coordinates: [lng, lat] };
     // Use session na consulta
     const region = await RegionModel.findOne({
       boundary: {
@@ -330,7 +328,7 @@ router.get('/regions/contains', async (req: ICustomRequest, res) => {
   }
 });
 
-router.get('/regions/near', async (req: ICustomRequest, res) => {
+router.get("/regions/near", async (req: ICustomRequest, res) => {
   const session = req.session || (await mongoose.startSession());
 
   try {
@@ -345,7 +343,7 @@ router.get('/regions/near', async (req: ICustomRequest, res) => {
         .json({ message: SERVER_MESSAGES.INVALID_DATA() });
     }
 
-    const point = { type: 'Point', coordinates: [lng, lat] };
+    const point = { type: "Point", coordinates: [lng, lat] };
     const query: any = {
       boundary: {
         $near: {
@@ -359,10 +357,9 @@ router.get('/regions/near', async (req: ICustomRequest, res) => {
       query.user = { $ne: excludeUser };
     }
 
-    // Use a sessão na consulta e no populate
     const regions = await RegionModel.find(query).session(session).populate({
-      path: 'user',
-      select: 'name',
+      path: "user",
+      select: "name",
       options: { session },
     });
 
