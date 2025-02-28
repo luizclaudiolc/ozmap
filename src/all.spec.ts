@@ -80,6 +80,7 @@ const createUser = async (withAddress = true, withCoordinates = false) => {
 
 const setupTestEnvironment = () => {
   let mongoServer: MongoMemoryServer;
+  // eslint-disable-next-line prefer-const
   let testIds: { userId?: string; regionId?: string } = {};
 
   before(async () => {
@@ -674,7 +675,7 @@ describe('Testes endpoints', () => {
       it('deve encontrar regiões próximas ao ponto especificado', async () => {
         const response = await supertest(server)
           .get('/regions/near')
-          .query({ lat: -22.5, lng: -43.1, distance: 50000 }); 
+          .query({ lat: -22.5, lng: -43.1, distance: 50000 });
 
         expectStatus(response, STATUS.OK);
         expect(response.body).to.be.an('array');
