@@ -20,7 +20,8 @@
     "i18next": "^24.2.2",
     "mongodb-memory-server": "^10.1.4",
     "mongoose": "^7.5.3",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
@@ -31,6 +32,7 @@
     "@types/reflect-metadata": "^0.1.0",
     "@types/sinon": "^10.0.17",
     "@types/supertest": "^2.0.13",
+    "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "eslint": "^8.57.1",
